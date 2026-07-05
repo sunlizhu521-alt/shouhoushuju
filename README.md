@@ -53,12 +53,13 @@ data/report.json
 790040313888268288
 ```
 
+抓取默认不带时间条件，不筛选任何时间范围，会自动分页直到拿完所有记录，并按 `repairOrderId` / `repairOrderNo` 自动去重。
+
 如需覆盖，在 GitHub 仓库变量中配置：
 
 ```text
 NEXTOP_TEMPLATE_ID
-NEXTOP_CREATE_START_TIME
-NEXTOP_CREATE_END_TIME
+NEXTOP_PAGE_SIZE
 NEXTOP_EXTRA_BODY_JSON
 ```
 

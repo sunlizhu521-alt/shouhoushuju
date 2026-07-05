@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   fetch:
@@ -26,8 +28,7 @@ jobs:
           NEXTOP_COOKIE: ${{ secrets.NEXTOP_COOKIE }}
           NEXTOP_SATOKEN: ${{ secrets.NEXTOP_SATOKEN }}
           NEXTOP_TEMPLATE_ID: ${{ vars.NEXTOP_TEMPLATE_ID }}
-          NEXTOP_CREATE_START_TIME: ${{ vars.NEXTOP_CREATE_START_TIME }}
-          NEXTOP_CREATE_END_TIME: ${{ vars.NEXTOP_CREATE_END_TIME }}
+          NEXTOP_PAGE_SIZE: ${{ vars.NEXTOP_PAGE_SIZE }}
           NEXTOP_EXTRA_BODY_JSON: ${{ vars.NEXTOP_EXTRA_BODY_JSON }}
         run: node scripts/fetch-nextop-report.js
 
@@ -42,3 +43,22 @@ jobs:
             git commit -m "Update Nextop report data"
             git push
           fi
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir _site
+          cp index.html _site/index.html
+          mkdir -p _site/data
+          cp data/report.json _site/data/report.json
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
