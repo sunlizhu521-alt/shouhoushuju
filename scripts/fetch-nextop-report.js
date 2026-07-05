@@ -117,7 +117,7 @@ async function waitForExport(headers, taskId) {
     }
 
     if (status !== 1) {
-      throw new Error(detail?.errorReason || detail?.message || `Export task ${taskId} failed with status ${detail?.executeStatus}`);
+      throw new Error(detail?.errorReason || detail?.message || `Export task ${taskId} returned unexpected detail: ${JSON.stringify(sanitizeTaskDetail(detail)).slice(0, 800)}`);
     }
 
     console.log(`Export task ${taskId} is still running (${attempt}/${MAX_POLL_ATTEMPTS}).`);
@@ -125,6 +125,15 @@ async function waitForExport(headers, taskId) {
   }
 
   throw new Error(`Export task ${taskId} did not finish after ${MAX_POLL_ATTEMPTS} polls.`);
+}
+
+function sanitizeTaskDetail(detail) {
+  if (!detail || typeof detail !== "object") return detail;
+  const sanitized = { ...detail };
+  for (const key of ["exportFileUrl", "fileUrl", "downloadUrl", "url"]) {
+    if (sanitized[key]) sanitized[key] = "[hidden]";
+  }
+  return sanitized;
 }
 
 function filenameFromResponse(response, fallback) {
