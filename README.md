@@ -1,11 +1,23 @@
-# 工单报表数据台
+# 售后工单导出数据
 
-这是一个 GitHub Pages 静态页面，数据由 GitHub Actions 定时抓取。
+这是一个 GitHub Pages 静态页面，数据由 GitHub Actions 每小时从 Nextop 导出文件并解析生成。
 
 - 页面文件：`index.html`
 - 预览地址：`https://sunlizhu521-alt.github.io/shouhoushuju/`
 - 数据文件：`data/report.json`
-- 数据能力：自动读取同步数据、示例数据、JSON 导入、搜索筛选、分页、详情查看、CSV 导出
+- 自动同步：每 1 小时运行一次，也支持手动运行 workflow
+
+## 数据流程
+
+当前脚本不再直接读取列表接口数据，而是模拟 Nextop 前端导出流程：
+
+1. 创建导出任务：`POST https://api.nextop.com/ticketOrder/wOrder/custom/report/download/async`
+2. 轮询任务详情：`GET https://api.nextop.com/performance/importExport/task/importExportTaskDetail?taskId=...`
+3. 下载导出文件：读取任务返回的 `exportFileUrl`
+4. 解析 Excel/CSV：写入 `data/report.json`
+5. 自动去重：优先按 `repairOrderId/工单ID`，再按 `repairOrderNo/工单编号`，最后按整行内容
+
+导出请求默认不带时间条件、不带状态条件、不带搜索条件。
 
 ## GitHub Secrets
 
@@ -23,29 +35,18 @@ NEXTOP_SATOKEN
 Settings -> Secrets and variables -> Actions -> New repository secret
 ```
 
-把 cURL 里的值分别填进去。
+把浏览器 DevTools 里复制的 cURL 对应值分别填进去。
 
-## 自动同步
+## 可选变量
 
-工作流文件：
-
-```text
-.github/workflows/fetch-nextop-report.yml
-```
-
-它会每 1 小时请求：
+如需覆盖默认模板或导出轮询参数，可在 GitHub Actions Variables 中配置：
 
 ```text
-POST https://api.nextop.com/ticketOrder/wOrder/custom/report
+NEXTOP_TEMPLATE_ID
+NEXTOP_WITH_HISTORY_COLUMN
+NEXTOP_EXPORT_MAX_POLLS
+NEXTOP_EXPORT_POLL_MS
 ```
-
-并把结果写入：
-
-```text
-data/report.json
-```
-
-页面会自动读取这个文件。
 
 默认模板 ID：
 
@@ -53,16 +54,6 @@ data/report.json
 790040313888268288
 ```
 
-抓取默认不带时间条件，不筛选任何时间范围，会自动分页直到拿完所有记录，并按 `repairOrderId` / `repairOrderNo` 自动去重。
-
-如需覆盖，在 GitHub 仓库变量中配置：
-
-```text
-NEXTOP_TEMPLATE_ID
-NEXTOP_PAGE_SIZE
-NEXTOP_EXTRA_BODY_JSON
-```
-
 ## 注意
 
-登录凭证会过期。过期后重新从 DevTools 复制 cURL，并更新 GitHub Secrets。
+登录凭证会过期。过期后需要重新从 DevTools 复制 cURL，并更新 GitHub Secrets。

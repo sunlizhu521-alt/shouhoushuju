@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>工单报表数据台</title>
+    <title>售后工单导出数据</title>
     <style>
       :root {
         color: #17202a;
@@ -35,14 +35,13 @@
       .app-shell {
         min-height: 100vh;
         display: grid;
-        grid-template-columns: 310px minmax(0, 1fr);
-        background: #f5f7f8;
+        grid-template-columns: 300px minmax(0, 1fr);
       }
 
       .sidebar {
         background: #ffffff;
-        border-right: 1px solid #e3e8ec;
-        padding: 24px 18px;
+        border-right: 1px solid #e2e8ee;
+        padding: 22px 18px;
         display: flex;
         flex-direction: column;
         gap: 18px;
@@ -50,20 +49,20 @@
 
       .brand {
         display: flex;
-        gap: 12px;
         align-items: center;
-        padding-bottom: 14px;
+        gap: 12px;
       }
 
       .brand-mark {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
         display: grid;
         place-items: center;
-        color: #0d826d;
+        color: #0a735f;
         background: #e8f6f2;
-        border: 1px solid #c9e7df;
-        border-radius: 8px;
+        border: 1px solid #c7e5dd;
+        font-weight: 800;
       }
 
       h1,
@@ -85,126 +84,57 @@
       .muted,
       .brand p,
       .topbar p {
-        color: #687681;
+        color: #667480;
         font-size: 13px;
         line-height: 1.5;
       }
 
       .side-section {
-        border-top: 1px solid #edf1f3;
-        padding-top: 18px;
+        border-top: 1px solid #eef2f5;
+        padding-top: 17px;
       }
 
       .section-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #44525d;
+        color: #41505d;
         font-size: 13px;
-        font-weight: 700;
+        font-weight: 800;
         margin-bottom: 10px;
       }
 
+      .metric-stack,
+      .status-stack,
       .field-stack {
         display: grid;
         gap: 10px;
       }
 
-      .field-stack label {
-        display: grid;
-        gap: 6px;
-        color: #56636f;
-        font-size: 12px;
-        font-weight: 700;
-      }
-
-      input,
-      select,
-      textarea {
-        width: 100%;
-        border: 1px solid #dfe6eb;
-        border-radius: 7px;
-        color: #17202a;
-        background: #ffffff;
-        outline: none;
-      }
-
-      input,
-      select {
-        height: 40px;
-        padding: 0 11px;
-      }
-
-      textarea {
-        min-height: 96px;
-        resize: vertical;
-        padding: 10px;
-        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-        font-size: 12px;
-        line-height: 1.5;
-      }
-
-      .button-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-
-      .primary-button,
-      .ghost-button,
-      .export-button {
-        min-height: 38px;
-        border-radius: 7px;
-        border: 1px solid transparent;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 700;
-        white-space: nowrap;
-      }
-
-      .primary-button {
-        width: 100%;
-        color: #ffffff;
-        background: #0e7c68;
-      }
-
-      .ghost-button,
-      .export-button {
-        color: #27343f;
-        background: #ffffff;
-        border-color: #dbe3e8;
-        padding: 0 14px;
-      }
-
-      .export-button {
-        color: #0e6f5d;
-      }
-
-      .notice {
-        color: #53626e;
-        font-size: 12px;
-        line-height: 1.5;
-        background: #f7f9fa;
-        border: 1px solid #e5eaee;
-        border-radius: 7px;
-        padding: 10px;
-      }
-
-      .status-stack {
-        display: grid;
-        gap: 9px;
-        color: #4b5964;
-        font-size: 13px;
-      }
-
-      .status-stack div {
+      .metric {
+        background: #f8fafb;
+        border: 1px solid #e5ebef;
+        border-radius: 8px;
+        padding: 13px;
         display: flex;
+        justify-content: space-between;
         align-items: center;
+        gap: 12px;
+      }
+
+      .metric span {
+        color: #61707b;
+        font-size: 12px;
+      }
+
+      .metric strong {
+        font-size: 18px;
+      }
+
+      .status-row {
+        display: flex;
         gap: 8px;
+        align-items: center;
+        color: #4c5b66;
+        font-size: 13px;
+        line-height: 1.45;
       }
 
       .dot {
@@ -223,33 +153,70 @@
       }
 
       .dot.neutral {
-        background: #8b98a4;
+        background: #8c98a3;
       }
 
-      .metric-section {
-        display: grid;
-        gap: 12px;
-      }
-
-      .metric-section div {
-        background: #f8fafb;
-        border: 1px solid #e6ecef;
-        border-radius: 8px;
-        padding: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-      }
-
-      .metric-section span {
-        color: #61707b;
-        font-size: 12px;
-      }
-
-      .metric-section strong {
+      textarea,
+      input,
+      select {
+        width: 100%;
+        border: 1px solid #dce4ea;
+        border-radius: 7px;
+        background: #ffffff;
         color: #17202a;
-        font-size: 18px;
+        outline: none;
+      }
+
+      input,
+      select {
+        height: 40px;
+        padding: 0 11px;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+        padding: 10px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .button-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .ghost-button,
+      .export-button {
+        min-height: 38px;
+        border-radius: 7px;
+        border: 1px solid #dbe3e8;
+        background: #ffffff;
+        color: #26333f;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 0 14px;
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .export-button {
+        color: #0a735f;
+      }
+
+      .notice {
+        color: #53626e;
+        font-size: 12px;
+        line-height: 1.5;
+        background: #f8fafb;
+        border: 1px solid #e5ebef;
+        border-radius: 7px;
+        padding: 10px;
       }
 
       .workspace {
@@ -262,31 +229,31 @@
 
       .topbar {
         display: flex;
-        align-items: center;
         justify-content: space-between;
-        gap: 18px;
+        align-items: center;
+        gap: 16px;
       }
 
       .toolbar {
         display: flex;
-        gap: 10px;
         align-items: center;
+        gap: 10px;
         flex-wrap: wrap;
       }
 
       .search-box {
-        width: min(430px, 100%);
+        width: min(520px, 100%);
       }
 
       .status-filter {
-        width: 190px;
+        width: 210px;
       }
 
       .content-grid {
-        min-height: 0;
         flex: 1;
+        min-height: 0;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 330px;
+        grid-template-columns: minmax(0, 1fr) 340px;
         gap: 14px;
       }
 
@@ -304,15 +271,21 @@
         min-width: 0;
       }
 
+      .table-scroll {
+        overflow: auto;
+        min-height: 360px;
+      }
+
       table {
         width: 100%;
+        min-width: 960px;
         border-collapse: collapse;
         table-layout: fixed;
       }
 
       th,
       td {
-        padding: 12px 13px;
+        padding: 11px 12px;
         border-bottom: 1px solid #edf1f4;
         text-align: left;
         vertical-align: middle;
@@ -324,10 +297,13 @@
       }
 
       th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
         background: #f9fbfc;
-        color: #5a6873;
+        color: #5b6974;
         font-size: 12px;
-        font-weight: 760;
+        font-weight: 800;
       }
 
       tbody tr {
@@ -339,64 +315,22 @@
         background: #f2fbf8;
       }
 
-      .mono {
-        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-        color: #0e6f5d;
-        font-weight: 700;
-      }
-
-      .summary {
-        color: #4b5964;
-      }
-
-      .chip {
-        display: inline-flex;
-        align-items: center;
-        max-width: 100%;
-        min-height: 24px;
-        padding: 3px 8px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 700;
-      }
-
-      .chip.green {
-        color: #067454;
-        background: #e6f7f1;
-      }
-
-      .chip.blue {
-        color: #1d5e93;
-        background: #eaf4ff;
-      }
-
-      .chip.amber {
-        color: #8a5a05;
-        background: #fff5d9;
-      }
-
-      .chip.gray {
-        color: #53616d;
-        background: #eef2f4;
-      }
-
       .empty {
         height: 280px;
-        color: #74828d;
+        color: #73818c;
         text-align: center;
       }
 
       .pager {
         min-height: 50px;
+        border-top: 1px solid #edf1f4;
         display: flex;
-        align-items: center;
         justify-content: space-between;
+        align-items: center;
         gap: 12px;
         padding: 10px 13px;
         color: #64727d;
         font-size: 13px;
-        border-top: 1px solid #edf1f4;
-        margin-top: auto;
       }
 
       .pager div {
@@ -407,17 +341,16 @@
       .pager button {
         width: 32px;
         height: 32px;
-        display: grid;
-        place-items: center;
-        color: #27343f;
-        background: #ffffff;
         border: 1px solid #dbe3e8;
         border-radius: 6px;
+        background: #ffffff;
+        display: grid;
+        place-items: center;
       }
 
       .pager button:disabled {
-        cursor: not-allowed;
         opacity: 0.55;
+        cursor: not-allowed;
       }
 
       .detail-panel {
@@ -436,11 +369,10 @@
       .detail-head span {
         color: #65737f;
         font-size: 12px;
-        font-weight: 760;
+        font-weight: 800;
       }
 
       .detail-head strong {
-        color: #17202a;
         font-size: 17px;
         overflow-wrap: anywhere;
       }
@@ -453,7 +385,7 @@
 
       dl div {
         display: grid;
-        grid-template-columns: 72px minmax(0, 1fr);
+        grid-template-columns: 80px minmax(0, 1fr);
         gap: 10px;
         font-size: 13px;
       }
@@ -475,7 +407,7 @@
         margin: 0;
         padding: 12px;
         color: #26333e;
-        background: #f7f9fa;
+        background: #f8fafb;
         border: 1px solid #e3e9ed;
         border-radius: 7px;
         font-size: 12px;
@@ -483,21 +415,14 @@
       }
 
       @media (max-width: 980px) {
-        .app-shell {
+        .app-shell,
+        .content-grid {
           grid-template-columns: 1fr;
         }
 
         .sidebar {
           border-right: 0;
-          border-bottom: 1px solid #e3e8ec;
-        }
-
-        .content-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .detail-panel {
-          min-height: 420px;
+          border-bottom: 1px solid #e2e8ee;
         }
       }
 
@@ -511,19 +436,11 @@
           flex-direction: column;
         }
 
-        .export-button,
-        .ghost-button,
         .search-box,
-        .status-filter {
+        .status-filter,
+        .ghost-button,
+        .export-button {
           width: 100%;
-        }
-
-        .table-panel {
-          overflow-x: auto;
-        }
-
-        table {
-          min-width: 920px;
         }
       }
     </style>
@@ -532,70 +449,52 @@
     <main class="app-shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark" aria-hidden="true">▣</div>
+          <div class="brand-mark" aria-hidden="true">表</div>
           <div>
-            <h1>工单报表数据台</h1>
-            <p>自动同步版</p>
+            <h1>售后工单导出数据</h1>
+            <p>每小时自动导出并解析</p>
           </div>
         </div>
 
         <section class="side-section">
-          <div class="section-title">▤ 数据来源</div>
-          <div class="field-stack">
-            <label>
-              接口地址
-              <input id="apiUrl" value="https://openapi.nextop.com/ticketOrder/wOrder/custom/report" />
-            </label>
-            <label>
-              请求头 JSON
-              <textarea id="headersInput">{"Content-Type":"application/json"}</textarea>
-            </label>
-            <label>
-              请求 Body JSON
-              <textarea id="bodyInput">{"current":1,"size":50,"searchCount":true}</textarea>
-            </label>
-            <button class="primary-button" id="fetchButton">尝试接口抓取</button>
-            <p class="notice" id="notice">正在读取自动同步数据...</p>
+          <div class="section-title">同步状态</div>
+          <div class="status-stack">
+            <div class="status-row"><span class="dot neutral" id="modeDot"></span><span id="modeText">加载中</span></div>
+            <div class="status-row"><span class="dot ok"></span><span>数据来源：Nextop 导出文件</span></div>
+            <div class="status-row"><span class="dot neutral"></span><span id="updatedText">等待数据</span></div>
           </div>
         </section>
 
+        <section class="side-section metric-stack">
+          <div class="metric"><span>当前记录</span><strong id="totalMetric">0</strong></div>
+          <div class="metric"><span>匹配记录</span><strong id="matchMetric">0</strong></div>
+          <div class="metric"><span>字段数量</span><strong id="fieldMetric">0</strong></div>
+        </section>
+
         <section class="side-section">
-          <div class="section-title">▥ 导入 JSON</div>
+          <div class="section-title">手动导入 JSON</div>
           <div class="field-stack">
-            <textarea id="jsonImport" placeholder="粘贴接口返回 JSON，支持 data.records / data.list / rows / 数组"></textarea>
+            <textarea id="jsonImport" placeholder="可粘贴 data/report.json 或接口返回 JSON，支持 data.records / records / rows / 数组"></textarea>
             <div class="button-row">
               <button class="ghost-button" id="importButton">导入</button>
-              <button class="ghost-button" id="demoButton">示例数据</button>
+              <button class="ghost-button" id="demoButton">示例</button>
             </div>
+            <p class="notice" id="notice">正在读取自动同步数据...</p>
           </div>
-        </section>
-
-        <section class="side-section">
-          <div class="section-title">⌁ 接口状态</div>
-          <div class="status-stack">
-            <div><span class="dot warn" id="modeDot"></span><span id="modeText">加载中</span></div>
-            <div><span class="dot ok"></span>GitHub Pages 已就绪</div>
-            <div><span class="dot neutral"></span><span id="updatedText">等待数据</span></div>
-          </div>
-        </section>
-
-        <section class="side-section metric-section">
-          <div><span>当前记录</span><strong id="totalMetric">0</strong></div>
-          <div><span>匹配记录</span><strong id="matchMetric">0</strong></div>
         </section>
       </aside>
 
       <section class="workspace">
         <header class="topbar">
           <div>
-            <h2>报表网格</h2>
-            <p>自动读取 GitHub Actions 同步结果，也支持手动导入和筛选导出。</p>
+            <h2>在线网格</h2>
+            <p>字段按导出文件自动生成，支持搜索、状态筛选、详情查看和 CSV 导出。</p>
           </div>
-          <button class="export-button" id="exportButton">⇩ 导出</button>
+          <button class="export-button" id="exportButton">导出 CSV</button>
         </header>
 
         <div class="toolbar">
-          <input class="search-box" id="searchInput" placeholder="搜索工单、客户、处理人" />
+          <input class="search-box" id="searchInput" placeholder="搜索任意字段" />
           <select class="status-filter" id="statusFilter">
             <option value="">全部状态</option>
           </select>
@@ -604,25 +503,17 @@
 
         <div class="content-grid">
           <div class="table-panel">
-            <table>
-              <thead>
-                <tr>
-                  <th>工单号</th>
-                  <th>客户邮箱</th>
-                  <th>状态</th>
-                  <th>创建时间</th>
-                  <th>处理人</th>
-                  <th>摘要</th>
-                  <th>同步时间</th>
-                </tr>
-              </thead>
-              <tbody id="tableBody"></tbody>
-            </table>
+            <div class="table-scroll">
+              <table>
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+            </div>
             <footer class="pager">
               <span id="pageText">第 1 / 1 页，共 0 行</span>
               <div>
-                <button id="prevButton" aria-label="上一页">‹</button>
-                <button id="nextButton" aria-label="下一页">›</button>
+                <button id="prevButton" aria-label="上一页">&lt;</button>
+                <button id="nextButton" aria-label="下一页">&gt;</button>
               </div>
             </footer>
           </div>
@@ -633,9 +524,9 @@
               <strong id="detailTitle">-</strong>
             </div>
             <dl>
-              <div><dt>远端 ID</dt><dd id="detailId">-</dd></div>
-              <div><dt>客户</dt><dd id="detailCustomer">-</dd></div>
+              <div><dt>主键</dt><dd id="detailId">-</dd></div>
               <div><dt>状态</dt><dd id="detailStatus">-</dd></div>
+              <div><dt>表单</dt><dd id="detailSheet">-</dd></div>
             </dl>
             <pre id="detailJson">{}</pre>
           </aside>
@@ -644,130 +535,128 @@
     </main>
 
     <script>
-      const pageSize = 12;
+      const pageSize = 15;
+      const preferredColumns = [
+        "工单编号",
+        "工单号",
+        "repairOrderNo",
+        "客户邮箱",
+        "customerEmail",
+        "状态",
+        "工单状态",
+        "statusName",
+        "创建时间",
+        "createTime",
+        "处理人",
+        "客服",
+        "serviceUserName",
+        "摘要",
+        "summary",
+      ];
+      const statusKeys = ["状态", "工单状态", "status", "statusName", "orderStatus"];
+      const idKeys = ["repairOrderId", "工单ID", "工单Id", "ID", "id", "repairOrderNo", "工单编号", "工单号", "订单号"];
+
       const state = {
         rows: [],
         filtered: [],
+        columns: [],
         page: 1,
-        selectedId: null,
+        selectedKey: "",
         mode: "加载中",
       };
 
       const els = {
-        apiUrl: document.querySelector("#apiUrl"),
-        headersInput: document.querySelector("#headersInput"),
-        bodyInput: document.querySelector("#bodyInput"),
-        fetchButton: document.querySelector("#fetchButton"),
-        notice: document.querySelector("#notice"),
         jsonImport: document.querySelector("#jsonImport"),
         importButton: document.querySelector("#importButton"),
         demoButton: document.querySelector("#demoButton"),
+        notice: document.querySelector("#notice"),
         modeDot: document.querySelector("#modeDot"),
         modeText: document.querySelector("#modeText"),
         updatedText: document.querySelector("#updatedText"),
         totalMetric: document.querySelector("#totalMetric"),
         matchMetric: document.querySelector("#matchMetric"),
+        fieldMetric: document.querySelector("#fieldMetric"),
         exportButton: document.querySelector("#exportButton"),
         searchInput: document.querySelector("#searchInput"),
         statusFilter: document.querySelector("#statusFilter"),
         clearButton: document.querySelector("#clearButton"),
+        tableHead: document.querySelector("#tableHead"),
         tableBody: document.querySelector("#tableBody"),
         pageText: document.querySelector("#pageText"),
         prevButton: document.querySelector("#prevButton"),
         nextButton: document.querySelector("#nextButton"),
         detailTitle: document.querySelector("#detailTitle"),
         detailId: document.querySelector("#detailId"),
-        detailCustomer: document.querySelector("#detailCustomer"),
         detailStatus: document.querySelector("#detailStatus"),
+        detailSheet: document.querySelector("#detailSheet"),
         detailJson: document.querySelector("#detailJson"),
       };
 
       function demoRows() {
-        const statuses = ["待处理", "处理中", "已完成", "已关闭"];
-        const users = ["张敏", "李明", "王佳", "陈阳"];
-        return Array.from({ length: 16 }, (_, index) => {
-          const rowNo = index + 1;
-          return {
-            id: `demo-${rowNo}`,
-            repairOrderNo: `WO-20260705-${1000 + rowNo}`,
-            customerEmail: `customer${rowNo}@example.com`,
-            statusName: statuses[index % statuses.length],
-            createTime: new Date(Date.UTC(2026, 6, 5, 8, 0, 0) - index * 5400 * 1000).toISOString(),
-            serviceUserName: users[index % users.length],
-            summary: `单页预览工单记录 ${rowNo}`,
-            source: "demo",
-          };
-        });
-      }
-
-      function firstValue(row, keys, fallback = "") {
-        for (const key of keys) {
-          if (row && row[key] !== undefined && row[key] !== null && row[key] !== "") return String(row[key]);
-        }
-        return fallback;
-      }
-
-      function normalize(row, index) {
-        const remoteId = firstValue(row, ["id", "orderId", "repairOrderId", "orderNo", "repairOrderNo"], `row-${index + 1}`);
-        return {
-          id: remoteId,
-          remoteId,
-          repairOrderNo: firstValue(row, ["repairOrderNo", "orderNo", "ticketNo", "code"], remoteId),
-          customerEmail: firstValue(row, ["customerEmail", "email", "customerMailAddr"]),
-          status: firstValue(row, ["statusName", "status", "orderStatus"], "unknown"),
-          createdAt: firstValue(row, ["createTime", "createdAt", "createdTime", "createDate"]),
-          serviceUser: firstValue(row, ["serviceUserName", "serviceUser", "assigneeName", "handlerName"]),
-          summary: firstValue(row, ["summary", "title", "subject", "description"]),
-          syncedAt: new Date().toISOString(),
-          raw: row,
-        };
+        return Array.from({ length: 18 }, (_, index) => ({
+          工单编号: `WO-20260705-${1001 + index}`,
+          客户邮箱: `customer${index + 1}@example.com`,
+          状态: ["待处理", "处理中", "已完成"][index % 3],
+          创建时间: new Date(Date.now() - index * 3600 * 1000).toISOString(),
+          处理人: ["张敏", "李明", "王佳"][index % 3],
+          摘要: `示例导出记录 ${index + 1}`,
+          __sheetName: "demo",
+        }));
       }
 
       function extractRows(payload) {
         if (Array.isArray(payload)) return payload;
-        const data = payload && payload.data;
-        if (Array.isArray(data)) return data;
-        if (data && typeof data === "object") {
-          for (const key of ["records", "list", "rows", "items", "data"]) {
-            if (Array.isArray(data[key])) return data[key];
-          }
-        }
-        for (const key of ["records", "list", "rows", "items"]) {
-          if (Array.isArray(payload && payload[key])) return payload[key];
-        }
+        if (Array.isArray(payload?.data)) return payload.data;
+        if (Array.isArray(payload?.data?.records)) return payload.data.records;
+        if (Array.isArray(payload?.data?.rows)) return payload.data.rows;
+        if (Array.isArray(payload?.records)) return payload.records;
+        if (Array.isArray(payload?.rows)) return payload.rows;
         return [];
       }
 
-      function formatDate(value) {
-        if (!value) return "-";
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return value;
-        return date.toLocaleString("zh-CN", { hour12: false });
+      function valueOf(row, keys, fallback = "") {
+        for (const key of keys) {
+          const value = row?.[key];
+          if (value !== undefined && value !== null && String(value).trim() !== "") return String(value);
+        }
+        return fallback;
       }
 
-      function statusTone(status) {
-        if (status.includes("完成") || status.includes("关闭") || status.toLowerCase().includes("success")) return "green";
-        if (status.includes("处理") || status.includes("进行")) return "blue";
-        if (status.includes("待") || status.toLowerCase().includes("pending")) return "amber";
-        return "gray";
+      function rowKey(row, index) {
+        return valueOf(row, idKeys, `row-${index + 1}`);
       }
 
-      function setNotice(message, mode = state.mode) {
+      function computeColumns(rows) {
+        const keys = [];
+        const seen = new Set();
+        const add = (key) => {
+          if (key && key !== "__rowKey" && !seen.has(key)) {
+            seen.add(key);
+            keys.push(key);
+          }
+        };
+        preferredColumns.forEach((key) => rows.some((row) => key in row) && add(key));
+        rows.forEach((row) => Object.keys(row).forEach(add));
+        return keys.slice(0, 28);
+      }
+
+      function setRows(rows, mode, message, fetchedAt) {
+        state.rows = rows.map((row, index) => ({ ...row, __rowKey: rowKey(row, index) }));
+        state.columns = computeColumns(state.rows);
+        state.page = 1;
+        state.selectedKey = state.rows[0]?.__rowKey || "";
+        els.searchInput.value = "";
+        els.statusFilter.value = "";
+        setNotice(message, mode, fetchedAt);
+        render();
+      }
+
+      function setNotice(message, mode, fetchedAt) {
         state.mode = mode;
         els.notice.textContent = message;
         els.modeText.textContent = mode;
         els.modeDot.className = mode.includes("成功") ? "dot ok" : mode.includes("失败") ? "dot warn" : "dot neutral";
-        els.updatedText.textContent = `更新：${new Date().toLocaleTimeString("zh-CN", { hour12: false })}`;
-      }
-
-      function setRows(rows, mode, message) {
-        state.rows = rows.map(normalize);
-        state.page = 1;
-        state.selectedId = state.rows[0] ? state.rows[0].id : null;
-        els.searchInput.value = "";
-        els.statusFilter.value = "";
-        setNotice(message, mode);
-        render();
+        els.updatedText.textContent = fetchedAt ? `同步：${formatDate(fetchedAt)}` : `更新：${new Date().toLocaleTimeString("zh-CN", { hour12: false })}`;
       }
 
       async function loadSyncedData() {
@@ -776,19 +665,16 @@
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const payload = await response.json();
           const rows = extractRows(payload);
-          if (!rows.length) throw new Error("自动同步文件中没有记录");
-          setRows(rows, "自动同步成功", `已读取自动同步数据：${rows.length} 行。`);
-          if (payload.fetchedAt) {
-            els.updatedText.textContent = `同步：${formatDate(payload.fetchedAt)}`;
-          }
+          if (!rows.length) throw new Error("自动同步文件里没有记录");
+          setRows(rows, "自动同步成功", `已读取自动导出解析数据：${rows.length} 行。`, payload.fetchedAt);
         } catch (error) {
-          setRows(demoRows(), "静态预览", `未读取到自动同步数据，已载入示例数据。原因：${error.message}`);
+          setRows(demoRows(), "静态预览", `未读取到自动同步数据，已载入示例。原因：${error.message}`);
         }
       }
 
       function updateStatusOptions() {
         const current = els.statusFilter.value;
-        const statuses = Array.from(new Set(state.rows.map((row) => row.status).filter(Boolean))).sort();
+        const statuses = Array.from(new Set(state.rows.map((row) => valueOf(row, statusKeys)).filter(Boolean))).sort();
         els.statusFilter.innerHTML = '<option value="">全部状态</option>' + statuses.map((status) => `<option value="${escapeHtml(status)}">${escapeHtml(status)}</option>`).join("");
         if (statuses.includes(current)) els.statusFilter.value = current;
       }
@@ -797,8 +683,8 @@
         const keyword = els.searchInput.value.trim().toLowerCase();
         const status = els.statusFilter.value;
         state.filtered = state.rows.filter((row) => {
-          const haystack = `${row.repairOrderNo} ${row.customerEmail} ${row.serviceUser} ${row.summary} ${JSON.stringify(row.raw)}`.toLowerCase();
-          return (!keyword || haystack.includes(keyword)) && (!status || row.status === status);
+          const haystack = JSON.stringify(row).toLowerCase();
+          return (!keyword || haystack.includes(keyword)) && (!status || valueOf(row, statusKeys) === status);
         });
         const totalPages = Math.max(Math.ceil(state.filtered.length / pageSize), 1);
         if (state.page > totalPages) state.page = totalPages;
@@ -811,48 +697,54 @@
         renderDetail();
         els.totalMetric.textContent = state.rows.length;
         els.matchMetric.textContent = state.filtered.length;
+        els.fieldMetric.textContent = state.columns.length;
       }
 
       function renderTable() {
         const totalPages = Math.max(Math.ceil(state.filtered.length / pageSize), 1);
         const start = (state.page - 1) * pageSize;
         const pageRows = state.filtered.slice(start, start + pageSize);
-        if (!pageRows.length) {
-          els.tableBody.innerHTML = '<tr><td class="empty" colspan="7">暂无数据，请尝试接口抓取、导入 JSON 或加载示例数据。</td></tr>';
+        els.tableHead.innerHTML = `<tr>${state.columns.map((key) => `<th>${escapeHtml(key)}</th>`).join("")}</tr>`;
+
+        if (!pageRows.length || !state.columns.length) {
+          els.tableBody.innerHTML = `<tr><td class="empty" colspan="${Math.max(state.columns.length, 1)}">暂无数据</td></tr>`;
         } else {
           els.tableBody.innerHTML = pageRows.map((row) => `
-            <tr class="${row.id === state.selectedId ? "selected" : ""}" data-id="${escapeHtml(row.id)}">
-              <td class="mono">${escapeHtml(row.repairOrderNo || "-")}</td>
-              <td>${escapeHtml(row.customerEmail || "-")}</td>
-              <td><span class="chip ${statusTone(row.status || "")}">${escapeHtml(row.status || "unknown")}</span></td>
-              <td>${escapeHtml(formatDate(row.createdAt))}</td>
-              <td>${escapeHtml(row.serviceUser || "-")}</td>
-              <td class="summary">${escapeHtml(row.summary || "-")}</td>
-              <td>${escapeHtml(formatDate(row.syncedAt))}</td>
+            <tr class="${row.__rowKey === state.selectedKey ? "selected" : ""}" data-key="${escapeHtml(row.__rowKey)}">
+              ${state.columns.map((key) => `<td title="${escapeHtml(row[key] || "")}">${escapeHtml(row[key] || "-")}</td>`).join("")}
             </tr>
           `).join("");
         }
+
         els.pageText.textContent = `第 ${state.page} / ${totalPages} 页，共 ${state.filtered.length} 行`;
         els.prevButton.disabled = state.page <= 1;
         els.nextButton.disabled = state.page >= totalPages;
       }
 
       function renderDetail() {
-        const selected = state.filtered.find((row) => row.id === state.selectedId) || state.filtered[0] || state.rows[0];
+        const selected = state.filtered.find((row) => row.__rowKey === state.selectedKey) || state.filtered[0] || state.rows[0];
         if (!selected) {
           els.detailTitle.textContent = "-";
           els.detailId.textContent = "-";
-          els.detailCustomer.textContent = "-";
           els.detailStatus.textContent = "-";
+          els.detailSheet.textContent = "-";
           els.detailJson.textContent = "{}";
           return;
         }
-        state.selectedId = selected.id;
-        els.detailTitle.textContent = selected.repairOrderNo || "-";
-        els.detailId.textContent = selected.remoteId || "-";
-        els.detailCustomer.textContent = selected.customerEmail || "-";
-        els.detailStatus.textContent = selected.status || "-";
-        els.detailJson.textContent = JSON.stringify(selected.raw, null, 2);
+        state.selectedKey = selected.__rowKey;
+        els.detailTitle.textContent = valueOf(selected, ["工单编号", "工单号", "repairOrderNo"], selected.__rowKey);
+        els.detailId.textContent = selected.__rowKey;
+        els.detailStatus.textContent = valueOf(selected, statusKeys, "-");
+        els.detailSheet.textContent = selected.__sheetName || "-";
+        const { __rowKey, ...raw } = selected;
+        els.detailJson.textContent = JSON.stringify(raw, null, 2);
+      }
+
+      function formatDate(value) {
+        if (!value) return "-";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleString("zh-CN", { hour12: false });
       }
 
       function escapeHtml(value) {
@@ -863,25 +755,6 @@
           '"': "&quot;",
           "'": "&#39;",
         }[char]));
-      }
-
-      async function fetchApi() {
-        try {
-          const headers = JSON.parse(els.headersInput.value || "{}");
-          const body = JSON.parse(els.bodyInput.value || "{}");
-          const response = await fetch(els.apiUrl.value, {
-            method: "POST",
-            headers,
-            body: JSON.stringify(body),
-          });
-          const payload = await response.json();
-          if (!response.ok) throw new Error(payload.message || payload.msg || `HTTP ${response.status}`);
-          const rows = extractRows(payload);
-          if (!rows.length) throw new Error("接口返回中没有识别到列表数据");
-          setRows(rows, "接口抓取成功", `接口抓取成功，已载入 ${rows.length} 行。`);
-        } catch (error) {
-          setNotice(`接口抓取失败：${error.message}。如果是跨域限制，请粘贴返回 JSON 导入。`, "接口抓取失败");
-        }
       }
 
       function importJson() {
@@ -896,27 +769,18 @@
       }
 
       function exportCsv() {
-        const header = ["工单号", "客户邮箱", "状态", "创建时间", "处理人", "摘要", "同步时间"];
-        const body = state.filtered.map((row) => [
-          row.repairOrderNo,
-          row.customerEmail,
-          row.status,
-          row.createdAt,
-          row.serviceUser,
-          row.summary,
-          row.syncedAt,
-        ]);
-        const csv = [header, ...body].map((line) => line.map((value) => `"${String(value || "").replaceAll('"', '""')}"`).join(",")).join("\n");
+        const header = state.columns;
+        const body = state.filtered.map((row) => header.map((key) => row[key] || ""));
+        const csv = [header, ...body].map((line) => line.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
         const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "ticket-report-grid.csv";
+        link.download = "nextop-export-grid.csv";
         link.click();
         URL.revokeObjectURL(url);
       }
 
-      els.fetchButton.addEventListener("click", fetchApi);
       els.importButton.addEventListener("click", importJson);
       els.demoButton.addEventListener("click", () => setRows(demoRows(), "静态预览", "已载入示例数据。"));
       els.exportButton.addEventListener("click", exportCsv);
@@ -944,9 +808,9 @@
         render();
       });
       els.tableBody.addEventListener("click", (event) => {
-        const row = event.target.closest("tr[data-id]");
+        const row = event.target.closest("tr[data-key]");
         if (!row) return;
-        state.selectedId = row.dataset.id;
+        state.selectedKey = row.dataset.key;
         render();
       });
 

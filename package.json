@@ -1,0 +1,11 @@
+{
+  "name": "shouhoushuju",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "fetch": "node scripts/fetch-nextop-report.js"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}
