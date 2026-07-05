@@ -33,7 +33,7 @@ Settings -> Secrets and variables -> Actions -> New repository secret
 .github/workflows/fetch-nextop-report.yml
 ```
 
-它会每 6 小时请求：
+它会每 1 小时请求：
 
 ```text
 POST https://api.nextop.com/ticketOrder/wOrder/custom/report
