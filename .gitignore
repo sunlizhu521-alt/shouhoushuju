@@ -1,10 +1,2 @@
-server/.env
-server/.venv/
-server/*.db
-server/__pycache__/
-
-client/node_modules/
-client/dist/
-
 .DS_Store
 Thumbs.db

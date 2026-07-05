@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>工单报表数据台</title>
+    <style>
+      :root {
+        color: #17202a;
+        background: #f5f7f8;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+        letter-spacing: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .app-shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 310px minmax(0, 1fr);
+        background: #f5f7f8;
+      }
+
+      .sidebar {
+        background: #ffffff;
+        border-right: 1px solid #e3e8ec;
+        padding: 24px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding-bottom: 14px;
+      }
+
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        color: #0d826d;
+        background: #e8f6f2;
+        border: 1px solid #c9e7df;
+        border-radius: 8px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 18px;
+        line-height: 1.3;
+      }
+
+      h2 {
+        font-size: 24px;
+        line-height: 1.25;
+      }
+
+      .muted,
+      .brand p,
+      .topbar p {
+        color: #687681;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .side-section {
+        border-top: 1px solid #edf1f3;
+        padding-top: 18px;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #44525d;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .field-stack {
+        display: grid;
+        gap: 10px;
+      }
+
+      .field-stack label {
+        display: grid;
+        gap: 6px;
+        color: #56636f;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid #dfe6eb;
+        border-radius: 7px;
+        color: #17202a;
+        background: #ffffff;
+        outline: none;
+      }
+
+      input,
+      select {
+        height: 40px;
+        padding: 0 11px;
+      }
+
+      textarea {
+        min-height: 96px;
+        resize: vertical;
+        padding: 10px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .button-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .primary-button,
+      .ghost-button,
+      .export-button {
+        min-height: 38px;
+        border-radius: 7px;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .primary-button {
+        width: 100%;
+        color: #ffffff;
+        background: #0e7c68;
+      }
+
+      .ghost-button,
+      .export-button {
+        color: #27343f;
+        background: #ffffff;
+        border-color: #dbe3e8;
+        padding: 0 14px;
+      }
+
+      .export-button {
+        color: #0e6f5d;
+      }
+
+      .notice {
+        color: #53626e;
+        font-size: 12px;
+        line-height: 1.5;
+        background: #f7f9fa;
+        border: 1px solid #e5eaee;
+        border-radius: 7px;
+        padding: 10px;
+      }
+
+      .status-stack {
+        display: grid;
+        gap: 9px;
+        color: #4b5964;
+        font-size: 13px;
+      }
+
+      .status-stack div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex: 0 0 auto;
+      }
+
+      .dot.ok {
+        background: #13a67d;
+      }
+
+      .dot.warn {
+        background: #d18b12;
+      }
+
+      .dot.neutral {
+        background: #8b98a4;
+      }
+
+      .metric-section {
+        display: grid;
+        gap: 12px;
+      }
+
+      .metric-section div {
+        background: #f8fafb;
+        border: 1px solid #e6ecef;
+        border-radius: 8px;
+        padding: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .metric-section span {
+        color: #61707b;
+        font-size: 12px;
+      }
+
+      .metric-section strong {
+        color: #17202a;
+        font-size: 18px;
+      }
+
+      .workspace {
+        min-width: 0;
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .search-box {
+        width: min(430px, 100%);
+      }
+
+      .status-filter {
+        width: 190px;
+      }
+
+      .content-grid {
+        min-height: 0;
+        flex: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 330px;
+        gap: 14px;
+      }
+
+      .table-panel,
+      .detail-panel {
+        background: #ffffff;
+        border: 1px solid #dde5ea;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .table-panel {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      th,
+      td {
+        padding: 12px 13px;
+        border-bottom: 1px solid #edf1f4;
+        text-align: left;
+        vertical-align: middle;
+        font-size: 13px;
+        line-height: 1.35;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      th {
+        background: #f9fbfc;
+        color: #5a6873;
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      tbody tr {
+        cursor: pointer;
+      }
+
+      tbody tr:hover,
+      tbody tr.selected {
+        background: #f2fbf8;
+      }
+
+      .mono {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        color: #0e6f5d;
+        font-weight: 700;
+      }
+
+      .summary {
+        color: #4b5964;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        max-width: 100%;
+        min-height: 24px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .chip.green {
+        color: #067454;
+        background: #e6f7f1;
+      }
+
+      .chip.blue {
+        color: #1d5e93;
+        background: #eaf4ff;
+      }
+
+      .chip.amber {
+        color: #8a5a05;
+        background: #fff5d9;
+      }
+
+      .chip.gray {
+        color: #53616d;
+        background: #eef2f4;
+      }
+
+      .empty {
+        height: 280px;
+        color: #74828d;
+        text-align: center;
+      }
+
+      .pager {
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 13px;
+        color: #64727d;
+        font-size: 13px;
+        border-top: 1px solid #edf1f4;
+        margin-top: auto;
+      }
+
+      .pager div {
+        display: flex;
+        gap: 6px;
+      }
+
+      .pager button {
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        color: #27343f;
+        background: #ffffff;
+        border: 1px solid #dbe3e8;
+        border-radius: 6px;
+      }
+
+      .pager button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .detail-panel {
+        padding: 16px;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .detail-head {
+        display: grid;
+        gap: 5px;
+      }
+
+      .detail-head span {
+        color: #65737f;
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .detail-head strong {
+        color: #17202a;
+        font-size: 17px;
+        overflow-wrap: anywhere;
+      }
+
+      dl {
+        display: grid;
+        gap: 9px;
+        margin: 0;
+      }
+
+      dl div {
+        display: grid;
+        grid-template-columns: 72px minmax(0, 1fr);
+        gap: 10px;
+        font-size: 13px;
+      }
+
+      dt {
+        color: #6c7a85;
+      }
+
+      dd {
+        margin: 0;
+        color: #26333e;
+        overflow-wrap: anywhere;
+      }
+
+      pre {
+        flex: 1;
+        min-height: 260px;
+        overflow: auto;
+        margin: 0;
+        padding: 12px;
+        color: #26333e;
+        background: #f7f9fa;
+        border: 1px solid #e3e9ed;
+        border-radius: 7px;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      @media (max-width: 980px) {
+        .app-shell {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          border-right: 0;
+          border-bottom: 1px solid #e3e8ec;
+        }
+
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .detail-panel {
+          min-height: 420px;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .workspace {
+          padding: 14px;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .export-button,
+        .ghost-button,
+        .search-box,
+        .status-filter {
+          width: 100%;
+        }
+
+        .table-panel {
+          overflow-x: auto;
+        }
+
+        table {
+          min-width: 920px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">▣</div>
+          <div>
+            <h1>工单报表数据台</h1>
+            <p>单页静态版</p>
+          </div>
+        </div>
+
+        <section class="side-section">
+          <div class="section-title">▤ 数据来源</div>
+          <div class="field-stack">
+            <label>
+              接口地址
+              <input id="apiUrl" value="https://openapi.nextop.com/ticketOrder/wOrder/custom/report" />
+            </label>
+            <label>
+              请求头 JSON
+              <textarea id="headersInput">{"Content-Type":"application/json"}</textarea>
+            </label>
+            <label>
+              请求 Body JSON
+              <textarea id="bodyInput">{"current":1,"size":50,"searchCount":true}</textarea>
+            </label>
+            <button class="primary-button" id="fetchButton">尝试接口抓取</button>
+            <p class="notice" id="notice">当前为单页静态版。接口若不允许浏览器跨域请求，可用下方 JSON 导入。</p>
+          </div>
+        </section>
+
+        <section class="side-section">
+          <div class="section-title">▥ 导入 JSON</div>
+          <div class="field-stack">
+            <textarea id="jsonImport" placeholder="粘贴接口返回 JSON，支持 data.records / data.list / rows / 数组"></textarea>
+            <div class="button-row">
+              <button class="ghost-button" id="importButton">导入</button>
+              <button class="ghost-button" id="demoButton">示例数据</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="side-section">
+          <div class="section-title">⌁ 接口状态</div>
+          <div class="status-stack">
+            <div><span class="dot warn" id="modeDot"></span><span id="modeText">静态预览</span></div>
+            <div><span class="dot ok"></span>单文件页面已就绪</div>
+            <div><span class="dot neutral"></span><span id="updatedText">等待数据</span></div>
+          </div>
+        </section>
+
+        <section class="side-section metric-section">
+          <div><span>当前记录</span><strong id="totalMetric">0</strong></div>
+          <div><span>匹配记录</span><strong id="matchMetric">0</strong></div>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <h2>报表网格</h2>
+            <p>一个页面内完成抓取尝试、导入、筛选、查看和导出。</p>
+          </div>
+          <button class="export-button" id="exportButton">⇩ 导出</button>
+        </header>
+
+        <div class="toolbar">
+          <input class="search-box" id="searchInput" placeholder="搜索工单、客户、处理人" />
+          <select class="status-filter" id="statusFilter">
+            <option value="">全部状态</option>
+          </select>
+          <button class="ghost-button" id="clearButton">清空筛选</button>
+        </div>
+
+        <div class="content-grid">
+          <div class="table-panel">
+            <table>
+              <thead>
+                <tr>
+                  <th>工单号</th>
+                  <th>客户邮箱</th>
+                  <th>状态</th>
+                  <th>创建时间</th>
+                  <th>处理人</th>
+                  <th>摘要</th>
+                  <th>同步时间</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+            <footer class="pager">
+              <span id="pageText">第 1 / 1 页，共 0 行</span>
+              <div>
+                <button id="prevButton" aria-label="上一页">‹</button>
+                <button id="nextButton" aria-label="下一页">›</button>
+              </div>
+            </footer>
+          </div>
+
+          <aside class="detail-panel">
+            <div class="detail-head">
+              <span>详情</span>
+              <strong id="detailTitle">-</strong>
+            </div>
+            <dl>
+              <div><dt>远端 ID</dt><dd id="detailId">-</dd></div>
+              <div><dt>客户</dt><dd id="detailCustomer">-</dd></div>
+              <div><dt>状态</dt><dd id="detailStatus">-</dd></div>
+            </dl>
+            <pre id="detailJson">{}</pre>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const pageSize = 12;
+      const state = {
+        rows: [],
+        filtered: [],
+        page: 1,
+        selectedId: null,
+        mode: "静态预览",
+      };
+
+      const els = {
+        apiUrl: document.querySelector("#apiUrl"),
+        headersInput: document.querySelector("#headersInput"),
+        bodyInput: document.querySelector("#bodyInput"),
+        fetchButton: document.querySelector("#fetchButton"),
+        notice: document.querySelector("#notice"),
+        jsonImport: document.querySelector("#jsonImport"),
+        importButton: document.querySelector("#importButton"),
+        demoButton: document.querySelector("#demoButton"),
+        modeDot: document.querySelector("#modeDot"),
+        modeText: document.querySelector("#modeText"),
+        updatedText: document.querySelector("#updatedText"),
+        totalMetric: document.querySelector("#totalMetric"),
+        matchMetric: document.querySelector("#matchMetric"),
+        exportButton: document.querySelector("#exportButton"),
+        searchInput: document.querySelector("#searchInput"),
+        statusFilter: document.querySelector("#statusFilter"),
+        clearButton: document.querySelector("#clearButton"),
+        tableBody: document.querySelector("#tableBody"),
+        pageText: document.querySelector("#pageText"),
+        prevButton: document.querySelector("#prevButton"),
+        nextButton: document.querySelector("#nextButton"),
+        detailTitle: document.querySelector("#detailTitle"),
+        detailId: document.querySelector("#detailId"),
+        detailCustomer: document.querySelector("#detailCustomer"),
+        detailStatus: document.querySelector("#detailStatus"),
+        detailJson: document.querySelector("#detailJson"),
+      };
+
+      function demoRows() {
+        const statuses = ["待处理", "处理中", "已完成", "已关闭"];
+        const users = ["张敏", "李明", "王佳", "陈阳"];
+        return Array.from({ length: 16 }, (_, index) => {
+          const rowNo = index + 1;
+          return {
+            id: `demo-${rowNo}`,
+            repairOrderNo: `WO-20260705-${1000 + rowNo}`,
+            customerEmail: `customer${rowNo}@example.com`,
+            statusName: statuses[index % statuses.length],
+            createTime: new Date(Date.UTC(2026, 6, 5, 8, 0, 0) - index * 5400 * 1000).toISOString(),
+            serviceUserName: users[index % users.length],
+            summary: `单页预览工单记录 ${rowNo}`,
+            source: "demo",
+          };
+        });
+      }
+
+      function firstValue(row, keys, fallback = "") {
+        for (const key of keys) {
+          if (row && row[key] !== undefined && row[key] !== null && row[key] !== "") return String(row[key]);
+        }
+        return fallback;
+      }
+
+      function normalize(row, index) {
+        const remoteId = firstValue(row, ["id", "orderId", "repairOrderId", "orderNo", "repairOrderNo"], `row-${index + 1}`);
+        return {
+          id: remoteId,
+          remoteId,
+          repairOrderNo: firstValue(row, ["repairOrderNo", "orderNo", "ticketNo", "code"], remoteId),
+          customerEmail: firstValue(row, ["customerEmail", "email", "customerMailAddr"]),
+          status: firstValue(row, ["statusName", "status", "orderStatus"], "unknown"),
+          createdAt: firstValue(row, ["createTime", "createdAt", "createdTime", "createDate"]),
+          serviceUser: firstValue(row, ["serviceUserName", "serviceUser", "assigneeName", "handlerName"]),
+          summary: firstValue(row, ["summary", "title", "subject", "description"]),
+          syncedAt: new Date().toISOString(),
+          raw: row,
+        };
+      }
+
+      function extractRows(payload) {
+        if (Array.isArray(payload)) return payload;
+        const data = payload && payload.data;
+        if (Array.isArray(data)) return data;
+        if (data && typeof data === "object") {
+          for (const key of ["records", "list", "rows", "items", "data"]) {
+            if (Array.isArray(data[key])) return data[key];
+          }
+        }
+        for (const key of ["records", "list", "rows", "items"]) {
+          if (Array.isArray(payload && payload[key])) return payload[key];
+        }
+        return [];
+      }
+
+      function formatDate(value) {
+        if (!value) return "-";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleString("zh-CN", { hour12: false });
+      }
+
+      function statusTone(status) {
+        if (status.includes("完成") || status.includes("关闭") || status.toLowerCase().includes("success")) return "green";
+        if (status.includes("处理") || status.includes("进行")) return "blue";
+        if (status.includes("待") || status.toLowerCase().includes("pending")) return "amber";
+        return "gray";
+      }
+
+      function setNotice(message, mode = state.mode) {
+        state.mode = mode;
+        els.notice.textContent = message;
+        els.modeText.textContent = mode;
+        els.modeDot.className = mode.includes("成功") ? "dot ok" : mode.includes("失败") ? "dot warn" : "dot neutral";
+        els.updatedText.textContent = `更新：${new Date().toLocaleTimeString("zh-CN", { hour12: false })}`;
+      }
+
+      function setRows(rows, mode, message) {
+        state.rows = rows.map(normalize);
+        state.page = 1;
+        state.selectedId = state.rows[0] ? state.rows[0].id : null;
+        els.searchInput.value = "";
+        els.statusFilter.value = "";
+        setNotice(message, mode);
+        render();
+      }
+
+      function updateStatusOptions() {
+        const current = els.statusFilter.value;
+        const statuses = Array.from(new Set(state.rows.map((row) => row.status).filter(Boolean))).sort();
+        els.statusFilter.innerHTML = '<option value="">全部状态</option>' + statuses.map((status) => `<option value="${escapeHtml(status)}">${escapeHtml(status)}</option>`).join("");
+        if (statuses.includes(current)) els.statusFilter.value = current;
+      }
+
+      function applyFilters() {
+        const keyword = els.searchInput.value.trim().toLowerCase();
+        const status = els.statusFilter.value;
+        state.filtered = state.rows.filter((row) => {
+          const haystack = `${row.repairOrderNo} ${row.customerEmail} ${row.serviceUser} ${row.summary} ${JSON.stringify(row.raw)}`.toLowerCase();
+          return (!keyword || haystack.includes(keyword)) && (!status || row.status === status);
+        });
+        const totalPages = Math.max(Math.ceil(state.filtered.length / pageSize), 1);
+        if (state.page > totalPages) state.page = totalPages;
+      }
+
+      function render() {
+        updateStatusOptions();
+        applyFilters();
+        renderTable();
+        renderDetail();
+        els.totalMetric.textContent = state.rows.length;
+        els.matchMetric.textContent = state.filtered.length;
+      }
+
+      function renderTable() {
+        const totalPages = Math.max(Math.ceil(state.filtered.length / pageSize), 1);
+        const start = (state.page - 1) * pageSize;
+        const pageRows = state.filtered.slice(start, start + pageSize);
+        if (!pageRows.length) {
+          els.tableBody.innerHTML = '<tr><td class="empty" colspan="7">暂无数据，请尝试接口抓取、导入 JSON 或加载示例数据。</td></tr>';
+        } else {
+          els.tableBody.innerHTML = pageRows.map((row) => `
+            <tr class="${row.id === state.selectedId ? "selected" : ""}" data-id="${escapeHtml(row.id)}">
+              <td class="mono">${escapeHtml(row.repairOrderNo || "-")}</td>
+              <td>${escapeHtml(row.customerEmail || "-")}</td>
+              <td><span class="chip ${statusTone(row.status || "")}">${escapeHtml(row.status || "unknown")}</span></td>
+              <td>${escapeHtml(formatDate(row.createdAt))}</td>
+              <td>${escapeHtml(row.serviceUser || "-")}</td>
+              <td class="summary">${escapeHtml(row.summary || "-")}</td>
+              <td>${escapeHtml(formatDate(row.syncedAt))}</td>
+            </tr>
+          `).join("");
+        }
+        els.pageText.textContent = `第 ${state.page} / ${totalPages} 页，共 ${state.filtered.length} 行`;
+        els.prevButton.disabled = state.page <= 1;
+        els.nextButton.disabled = state.page >= totalPages;
+      }
+
+      function renderDetail() {
+        const selected = state.filtered.find((row) => row.id === state.selectedId) || state.filtered[0] || state.rows[0];
+        if (!selected) {
+          els.detailTitle.textContent = "-";
+          els.detailId.textContent = "-";
+          els.detailCustomer.textContent = "-";
+          els.detailStatus.textContent = "-";
+          els.detailJson.textContent = "{}";
+          return;
+        }
+        state.selectedId = selected.id;
+        els.detailTitle.textContent = selected.repairOrderNo || "-";
+        els.detailId.textContent = selected.remoteId || "-";
+        els.detailCustomer.textContent = selected.customerEmail || "-";
+        els.detailStatus.textContent = selected.status || "-";
+        els.detailJson.textContent = JSON.stringify(selected.raw, null, 2);
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (char) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }[char]));
+      }
+
+      async function fetchApi() {
+        try {
+          const headers = JSON.parse(els.headersInput.value || "{}");
+          const body = JSON.parse(els.bodyInput.value || "{}");
+          const response = await fetch(els.apiUrl.value, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(body),
+          });
+          const payload = await response.json();
+          if (!response.ok) throw new Error(payload.message || payload.msg || `HTTP ${response.status}`);
+          const rows = extractRows(payload);
+          if (!rows.length) throw new Error("接口返回中没有识别到列表数据");
+          setRows(rows, "接口抓取成功", `接口抓取成功，已载入 ${rows.length} 行。`);
+        } catch (error) {
+          setNotice(`接口抓取失败：${error.message}。如果是跨域限制，请粘贴返回 JSON 导入。`, "接口抓取失败");
+        }
+      }
+
+      function importJson() {
+        try {
+          const payload = JSON.parse(els.jsonImport.value);
+          const rows = extractRows(payload);
+          if (!rows.length) throw new Error("没有识别到列表数据");
+          setRows(rows, "JSON 导入成功", `JSON 导入成功，已载入 ${rows.length} 行。`);
+        } catch (error) {
+          setNotice(`JSON 导入失败：${error.message}`, "导入失败");
+        }
+      }
+
+      function exportCsv() {
+        const header = ["工单号", "客户邮箱", "状态", "创建时间", "处理人", "摘要", "同步时间"];
+        const body = state.filtered.map((row) => [
+          row.repairOrderNo,
+          row.customerEmail,
+          row.status,
+          row.createdAt,
+          row.serviceUser,
+          row.summary,
+          row.syncedAt,
+        ]);
+        const csv = [header, ...body].map((line) => line.map((value) => `"${String(value || "").replaceAll('"', '""')}"`).join(",")).join("\n");
+        const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "ticket-report-grid.csv";
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      els.fetchButton.addEventListener("click", fetchApi);
+      els.importButton.addEventListener("click", importJson);
+      els.demoButton.addEventListener("click", () => setRows(demoRows(), "静态预览", "已载入示例数据。"));
+      els.exportButton.addEventListener("click", exportCsv);
+      els.searchInput.addEventListener("input", () => {
+        state.page = 1;
+        render();
+      });
+      els.statusFilter.addEventListener("change", () => {
+        state.page = 1;
+        render();
+      });
+      els.clearButton.addEventListener("click", () => {
+        els.searchInput.value = "";
+        els.statusFilter.value = "";
+        state.page = 1;
+        render();
+      });
+      els.prevButton.addEventListener("click", () => {
+        state.page = Math.max(1, state.page - 1);
+        render();
+      });
+      els.nextButton.addEventListener("click", () => {
+        const totalPages = Math.max(Math.ceil(state.filtered.length / pageSize), 1);
+        state.page = Math.min(totalPages, state.page + 1);
+        render();
+      });
+      els.tableBody.addEventListener("click", (event) => {
+        const row = event.target.closest("tr[data-id]");
+        if (!row) return;
+        state.selectedId = row.dataset.id;
+        render();
+      });
+
+      setRows(demoRows(), "静态预览", "已载入示例数据。");
+    </script>
+  </body>
+</html>
