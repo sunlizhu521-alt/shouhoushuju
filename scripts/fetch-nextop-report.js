@@ -23,6 +23,22 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function fetchWithRetry(url, options, context, attempts = 4) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await fetch(url, options);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) {
+        console.log(`${context} network retry ${attempt}/${attempts - 1}: ${error.message}`);
+        await sleep(1000 * attempt);
+      }
+    }
+  }
+  throw new Error(`${context} network error: ${lastError?.message || "fetch failed"}`);
+}
+
 function buildBaseHeaders() {
   return {
     Accept: "application/json, text/plain, */*",
@@ -79,11 +95,11 @@ function unwrapData(payload) {
 }
 
 async function createExportTask(headers, payload) {
-  const response = await fetch(EXPORT_URL, {
+  const response = await fetchWithRetry(EXPORT_URL, {
     method: "POST",
     headers: withRequestNonce(headers),
     body: JSON.stringify(payload),
-  });
+  }, "Create export task");
   const json = await readJsonResponse(response, "Create export task");
   const data = unwrapData(json);
   const taskId = typeof data === "string" || typeof data === "number"
@@ -100,10 +116,10 @@ async function createExportTask(headers, payload) {
 async function fetchTaskDetail(headers, taskId) {
   const url = new URL(TASK_DETAIL_URL);
   url.searchParams.set("taskId", taskId);
-  const response = await fetch(url, {
+  const response = await fetchWithRetry(url, {
     method: "GET",
     headers: withRequestNonce(headers),
-  });
+  }, "Export task detail");
   const json = await readJsonResponse(response, "Export task detail");
   return unwrapData(json);
 }
@@ -153,7 +169,7 @@ function filenameFromResponse(response, fallback) {
 
 async function downloadExportFile(headers, exportFileUrl) {
   const url = new URL(exportFileUrl, API_ORIGIN).toString();
-  const response = await fetch(url, {
+  const response = await fetchWithRetry(url, {
     method: "GET",
     headers: {
       Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv, */*",
@@ -163,7 +179,7 @@ async function downloadExportFile(headers, exportFileUrl) {
       "x-ca-language": headers["x-ca-language"],
       ...withRequestNonce({}),
     },
-  });
+  }, "Download export file");
 
   if (!response.ok) {
     const text = await response.text();
