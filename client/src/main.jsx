@@ -16,6 +16,56 @@ import "./styles.css";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:5088";
 const PAGE_SIZE = 12;
+const DEMO_CONFIG = {
+  apiUrl: "静态预览模式",
+  hasAuthToken: false,
+  hasCookie: false,
+  templateId: "demo",
+};
+const DEMO_ROWS = Array.from({ length: 16 }, (_, index) => {
+  const rowNo = index + 1;
+  const statuses = ["待处理", "处理中", "已完成", "已关闭"];
+  const users = ["张敏", "李明", "王佳", "陈阳"];
+  const row = {
+    id: rowNo,
+    remote_id: `demo-${rowNo}`,
+    repair_order_no: `WO-20260705-${1000 + rowNo}`,
+    customer_email: `customer${rowNo}@example.com`,
+    status: statuses[index % statuses.length],
+    created_at: new Date(Date.UTC(2026, 6, 5, 8, 0, 0) - index * 5400 * 1000).toISOString(),
+    service_user: users[index % users.length],
+    summary: `静态预览工单记录 ${rowNo}`,
+    synced_at: new Date(Date.UTC(2026, 6, 5, 9, 30, 0)).toISOString(),
+  };
+  return { ...row, raw_json: JSON.stringify(row) };
+});
+const DEMO_STATS = {
+  total: DEMO_ROWS.length,
+  statuses: ["待处理", "处理中", "已完成", "已关闭"].map((status) => ({
+    status,
+    count: DEMO_ROWS.filter((row) => row.status === status).length,
+  })),
+  latestSync: {
+    status: "demo",
+    rows_upserted: DEMO_ROWS.length,
+    message: "静态预览模式",
+  },
+};
+
+function demoPage({ nextPage, search, status }) {
+  const keyword = search.trim().toLowerCase();
+  const filtered = DEMO_ROWS.filter((row) => {
+    const matchesStatus = !status || row.status === status;
+    const haystack = `${row.repair_order_no} ${row.customer_email} ${row.service_user} ${row.summary}`.toLowerCase();
+    return matchesStatus && (!keyword || haystack.includes(keyword));
+  });
+  const start = (nextPage - 1) * PAGE_SIZE;
+  return {
+    rows: filtered.slice(start, start + PAGE_SIZE),
+    total: filtered.length,
+    page: nextPage,
+  };
+}
 
 function formatDate(value) {
   if (!value) return "-";
@@ -75,15 +125,30 @@ function App() {
       setTotal(payload.total);
       setPage(payload.page);
       if (!selectedId && payload.rows[0]) setSelectedId(payload.rows[0].id);
+    } catch {
+      const payload = demoPage({ nextPage, search, status });
+      setRows(payload.rows);
+      setTotal(payload.total);
+      setPage(payload.page);
+      if (payload.rows[0]) setSelectedId(payload.rows[0].id);
+      setConfig(DEMO_CONFIG);
+      setStats(DEMO_STATS);
+      setNotice("静态预览模式：后端未连接，正在显示示例数据。");
     } finally {
       setLoading(false);
     }
   }
 
   async function loadStats() {
-    const [nextConfig, nextStats] = await Promise.all([fetchJson("/api/config"), fetchJson("/api/stats")]);
-    setConfig(nextConfig);
-    setStats(nextStats);
+    try {
+      const [nextConfig, nextStats] = await Promise.all([fetchJson("/api/config"), fetchJson("/api/stats")]);
+      setConfig(nextConfig);
+      setStats(nextStats);
+    } catch {
+      setConfig(DEMO_CONFIG);
+      setStats(DEMO_STATS);
+      setNotice("静态预览模式：后端未连接，正在显示示例数据。");
+    }
   }
 
   async function syncData() {
@@ -94,11 +159,40 @@ function App() {
       setNotice(payload.message || `已同步 ${payload.rowsUpserted} 行`);
       await loadStats();
       await loadRows(1);
-    } catch (error) {
-      setNotice(error.message);
+    } catch {
+      const payload = demoPage({ nextPage: 1, search, status });
+      setConfig(DEMO_CONFIG);
+      setStats(DEMO_STATS);
+      setRows(payload.rows);
+      setTotal(payload.total);
+      setPage(1);
+      setNotice("静态预览模式：后端未连接，已刷新示例数据。");
     } finally {
       setSyncing(false);
     }
+  }
+
+  function exportCsv() {
+    const header = ["工单号", "客户邮箱", "状态", "创建时间", "处理人", "摘要", "同步时间"];
+    const body = rows.map((row) => [
+      row.repair_order_no,
+      row.customer_email,
+      row.status,
+      row.created_at,
+      row.service_user,
+      row.summary,
+      row.synced_at,
+    ]);
+    const csv = [header, ...body]
+      .map((line) => line.map((value) => `"${String(value || "").replaceAll('"', '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ticket-report-preview.csv";
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   useEffect(() => {
@@ -179,10 +273,10 @@ function App() {
             <h2>报表网格</h2>
             <p>从接口抓取数据，落库后用于筛选、查看和导出。</p>
           </div>
-          <a className="export-button" href={`${API_BASE}/api/export.csv?page=1&pageSize=200&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`}>
+          <button className="export-button" onClick={exportCsv}>
             <Download size={16} />
             <span>导出</span>
-          </a>
+          </button>
         </header>
 
         <div className="toolbar">
