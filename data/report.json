@@ -1,0 +1,12 @@
+{
+  "code": "DEMO",
+  "msg": "GitHub Actions 尚未同步真实数据，页面会显示示例数据。",
+  "fetchedAt": null,
+  "request": {
+    "url": "https://api.nextop.com/ticketOrder/wOrder/custom/report",
+    "templateId": "790040313888268288"
+  },
+  "data": {
+    "records": []
+  }
+}

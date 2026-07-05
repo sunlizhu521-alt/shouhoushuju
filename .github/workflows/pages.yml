@@ -32,6 +32,8 @@ jobs:
         run: |
           mkdir _site
           cp index.html _site/index.html
+          mkdir -p _site/data
+          cp data/report.json _site/data/report.json
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -1,19 +1,67 @@
 # 工单报表数据台
 
-这是一个单文件静态页面版本，不再区分前端和后端。
+这是一个 GitHub Pages 静态页面，数据由 GitHub Actions 定时抓取。
 
 - 页面文件：`index.html`
 - 预览地址：`https://sunlizhu521-alt.github.io/shouhoushuju/`
-- 数据能力：示例数据、JSON 导入、浏览器直连接口尝试、搜索筛选、分页、详情查看、CSV 导出
+- 数据文件：`data/report.json`
+- 数据能力：自动读取同步数据、示例数据、JSON 导入、搜索筛选、分页、详情查看、CSV 导出
 
-## 说明
+## GitHub Secrets
 
-页面可以在浏览器里尝试请求：
+仓库需要配置这些 Secrets，不能写进代码：
 
 ```text
-POST https://openapi.nextop.com/ticketOrder/wOrder/custom/report
+NEXTOP_AUTHORIZATION
+NEXTOP_COOKIE
+NEXTOP_SATOKEN
 ```
 
-如果该接口不允许浏览器跨域请求，页面会提示失败；这种情况下可以把接口返回 JSON 粘贴到页面的“导入 JSON”区域使用。
+进入 GitHub 仓库：
 
-不要把长期有效的密钥提交到仓库。页面里的请求头只存在于当前浏览器会话。
+```text
+Settings -> Secrets and variables -> Actions -> New repository secret
+```
+
+把 cURL 里的值分别填进去。
+
+## 自动同步
+
+工作流文件：
+
+```text
+.github/workflows/fetch-nextop-report.yml
+```
+
+它会每 6 小时请求：
+
+```text
+POST https://api.nextop.com/ticketOrder/wOrder/custom/report
+```
+
+并把结果写入：
+
+```text
+data/report.json
+```
+
+页面会自动读取这个文件。
+
+默认模板 ID：
+
+```text
+790040313888268288
+```
+
+如需覆盖，在 GitHub 仓库变量中配置：
+
+```text
+NEXTOP_TEMPLATE_ID
+NEXTOP_CREATE_START_TIME
+NEXTOP_CREATE_END_TIME
+NEXTOP_EXTRA_BODY_JSON
+```
+
+## 注意
+
+登录凭证会过期。过期后重新从 DevTools 复制 cURL，并更新 GitHub Secrets。

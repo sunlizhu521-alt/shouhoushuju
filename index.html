@@ -535,7 +535,7 @@
           <div class="brand-mark" aria-hidden="true">▣</div>
           <div>
             <h1>工单报表数据台</h1>
-            <p>单页静态版</p>
+            <p>自动同步版</p>
           </div>
         </div>
 
@@ -555,7 +555,7 @@
               <textarea id="bodyInput">{"current":1,"size":50,"searchCount":true}</textarea>
             </label>
             <button class="primary-button" id="fetchButton">尝试接口抓取</button>
-            <p class="notice" id="notice">当前为单页静态版。接口若不允许浏览器跨域请求，可用下方 JSON 导入。</p>
+            <p class="notice" id="notice">正在读取自动同步数据...</p>
           </div>
         </section>
 
@@ -573,8 +573,8 @@
         <section class="side-section">
           <div class="section-title">⌁ 接口状态</div>
           <div class="status-stack">
-            <div><span class="dot warn" id="modeDot"></span><span id="modeText">静态预览</span></div>
-            <div><span class="dot ok"></span>单文件页面已就绪</div>
+            <div><span class="dot warn" id="modeDot"></span><span id="modeText">加载中</span></div>
+            <div><span class="dot ok"></span>GitHub Pages 已就绪</div>
             <div><span class="dot neutral"></span><span id="updatedText">等待数据</span></div>
           </div>
         </section>
@@ -589,7 +589,7 @@
         <header class="topbar">
           <div>
             <h2>报表网格</h2>
-            <p>一个页面内完成抓取尝试、导入、筛选、查看和导出。</p>
+            <p>自动读取 GitHub Actions 同步结果，也支持手动导入和筛选导出。</p>
           </div>
           <button class="export-button" id="exportButton">⇩ 导出</button>
         </header>
@@ -650,7 +650,7 @@
         filtered: [],
         page: 1,
         selectedId: null,
-        mode: "静态预览",
+        mode: "加载中",
       };
 
       const els = {
@@ -768,6 +768,22 @@
         els.statusFilter.value = "";
         setNotice(message, mode);
         render();
+      }
+
+      async function loadSyncedData() {
+        try {
+          const response = await fetch(`data/report.json?ts=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const payload = await response.json();
+          const rows = extractRows(payload);
+          if (!rows.length) throw new Error("自动同步文件中没有记录");
+          setRows(rows, "自动同步成功", `已读取自动同步数据：${rows.length} 行。`);
+          if (payload.fetchedAt) {
+            els.updatedText.textContent = `同步：${formatDate(payload.fetchedAt)}`;
+          }
+        } catch (error) {
+          setRows(demoRows(), "静态预览", `未读取到自动同步数据，已载入示例数据。原因：${error.message}`);
+        }
       }
 
       function updateStatusOptions() {
@@ -934,7 +950,7 @@
         render();
       });
 
-      setRows(demoRows(), "静态预览", "已载入示例数据。");
+      loadSyncedData();
     </script>
   </body>
 </html>

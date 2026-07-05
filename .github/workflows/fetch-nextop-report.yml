@@ -1,0 +1,44 @@
+name: Fetch Nextop Report
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 */6 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Fetch report
+        env:
+          NEXTOP_AUTHORIZATION: ${{ secrets.NEXTOP_AUTHORIZATION }}
+          NEXTOP_COOKIE: ${{ secrets.NEXTOP_COOKIE }}
+          NEXTOP_SATOKEN: ${{ secrets.NEXTOP_SATOKEN }}
+          NEXTOP_TEMPLATE_ID: ${{ vars.NEXTOP_TEMPLATE_ID }}
+          NEXTOP_CREATE_START_TIME: ${{ vars.NEXTOP_CREATE_START_TIME }}
+          NEXTOP_CREATE_END_TIME: ${{ vars.NEXTOP_CREATE_END_TIME }}
+          NEXTOP_EXTRA_BODY_JSON: ${{ vars.NEXTOP_EXTRA_BODY_JSON }}
+        run: node scripts/fetch-nextop-report.js
+
+      - name: Commit report data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/report.json
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Update Nextop report data"
+            git push
+          fi
