@@ -23,8 +23,7 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function buildHeaders() {
-  const requestTime = Date.now();
+function buildBaseHeaders() {
   return {
     Accept: "application/json, text/plain, */*",
     "Accept-Language": "zh-CN,zh;q=0.9",
@@ -36,6 +35,13 @@ function buildHeaders() {
     Referer: "https://saas.nextop.com/crm/orderManage/workOrderReport/customization/index",
     saToken: requireEnv("NEXTOP_SATOKEN"),
     "x-ca-language": "zh_CN",
+  };
+}
+
+function withRequestNonce(headers) {
+  const requestTime = Date.now();
+  return {
+    ...headers,
     "x-ca-reqid": `${Math.random()}-${requestTime}`,
     "x-ca-reqtime": `${requestTime}`,
   };
@@ -75,7 +81,7 @@ function unwrapData(payload) {
 async function createExportTask(headers, payload) {
   const response = await fetch(EXPORT_URL, {
     method: "POST",
-    headers,
+    headers: withRequestNonce(headers),
     body: JSON.stringify(payload),
   });
   const json = await readJsonResponse(response, "Create export task");
@@ -96,7 +102,7 @@ async function fetchTaskDetail(headers, taskId) {
   url.searchParams.set("taskId", taskId);
   const response = await fetch(url, {
     method: "GET",
-    headers,
+    headers: withRequestNonce(headers),
   });
   const json = await readJsonResponse(response, "Export task detail");
   return unwrapData(json);
@@ -155,6 +161,7 @@ async function downloadExportFile(headers, exportFileUrl) {
       Cookie: headers.Cookie,
       saToken: headers.saToken,
       "x-ca-language": headers["x-ca-language"],
+      ...withRequestNonce({}),
     },
   });
 
@@ -241,7 +248,7 @@ function dedupeRecords(records) {
 }
 
 async function main() {
-  const headers = buildHeaders();
+  const headers = buildBaseHeaders();
   const exportPayload = buildExportPayload();
   const { taskId, raw: createTaskResponse } = await createExportTask(headers, exportPayload);
   console.log(`Created export task ${taskId}.`);
