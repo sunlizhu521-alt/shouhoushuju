@@ -66,7 +66,7 @@ async function readJsonResponse(response, context) {
 }
 
 function unwrapData(payload) {
-  if (payload && typeof payload === "object" && payload.data && typeof payload.data === "object") {
+  if (payload && typeof payload === "object" && Object.prototype.hasOwnProperty.call(payload, "data")) {
     return payload.data;
   }
   return payload;
@@ -80,7 +80,9 @@ async function createExportTask(headers, payload) {
   });
   const json = await readJsonResponse(response, "Create export task");
   const data = unwrapData(json);
-  const taskId = data?.id || data?.taskId || data?.importExportTaskId;
+  const taskId = typeof data === "string" || typeof data === "number"
+    ? String(data)
+    : data?.id || data?.taskId || data?.importExportTaskId;
 
   if (!taskId) {
     throw new Error(`Export task response did not include a task id: ${JSON.stringify(json).slice(0, 500)}`);
